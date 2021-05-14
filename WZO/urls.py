@@ -32,6 +32,7 @@ urlpatterns = [
     path('settings/', views.Settings.as_view(), name="Settings"),
     path('calculate/', views.Calculate.as_view(), name="Calculate"),
     path('export/', views.Export.as_view(), name="Export"),
+    path('healthcheck/', views.HealthCheck.as_view(), name="HealthCheck"),
     path('run/<ruletype>', views.run_Rules, name="Run Rules"),
     path('import/', views.Import.as_view(), name="Importer"),
     path('api/v1/account/<pk>', views.WZOUser_Api.as_view()),

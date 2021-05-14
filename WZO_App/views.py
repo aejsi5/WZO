@@ -562,6 +562,17 @@ class Import(View):
         else:
             return str(obj)
 
+class HealthCheck(View):
+    template_name = "healthcheck.html"
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            geocode_result = gmaps.geocode("Helmholtzstraße 3 30165 Hannover Deutschland")
+            print(geocode_result)
+            return render(request, self.template_name)
+        else:
+            return HttpResponse(status=403)
+
 class Eort_Api(APIView):
     permission_classes = [IsAuthenticated]
 
