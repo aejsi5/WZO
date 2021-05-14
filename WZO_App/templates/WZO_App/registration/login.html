@@ -1,0 +1,36 @@
+{% extends 'WZO_App/registration/base.html' %}
+
+{% block maincontent %}
+
+<!--Register-->
+<div class="register-container">
+    <h3>Login</h3>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group row reg-row">
+            {{login_form.username.label}}
+            {{login_form.username}}
+            {% for error in login_form.username.errors %}
+            <small style="color: red">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="form-group row reg-row">
+            {{login_form.password.label}}
+            {{login_form.password}}
+            {% for error in login_form.password.errors %}
+            <small style="color: red">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="reg-controls">
+            <button class="btn btn-primary" type="submit">Login</button>
+        </div>
+    </form>
+    <p class="text-center">Don't have an account? <a href="/register">Create an account</a></p>
+    <p class="text-center">Forgot Password? <a href="/reset">Reset</a></p>
+</div>
+{% if error %}
+<div class="error-login">
+    Anmeldung Fehlgeschlagen
+</div>
+{% endif %}
+{% endblock %}

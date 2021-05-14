@@ -1,0 +1,158 @@
+{% extends 'WZO_App/base.html' %}
+{% block maincontent %}
+    <section id="import_section">
+        <div class="container import_container">
+            <div class="row">
+                {% if perms.WZO_App.add_zip_code %}
+                <div class="col">
+                    <form class='import_form' method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col">
+                                <h3>PLZ-Import</h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <a href="/static/samples/zip_codes.csv" class="btn btn-info" id="sample_eort">Beispieldatei</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="import_zip" class="form-label">Datei auswählen</label>
+                                <input class="form-control" type="file" accept=".csv" id="import_zips" name="import_zips">
+                                <div id="import_zip_help" class="form-text">Erlaubt sind nur csv-Datein</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary" id="upload_zip">Hochladen</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+                {% if perms.WZO_App.add_eort %}
+                <div class="col">
+                    <form class='import_form' method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col">
+                                <h3>Eort-Import</h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <a href="/static/samples/eort.csv" class="btn btn-info" id="sample_eort">Beispieldatei</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="import_eort" class="form-label">Datei auswählen</label>
+                                <input class="form-control" type="file" accept=".csv" id="import_eort" name="import_eort">
+                                <div id="import_eort_help" class="form-text">Erlaubt sind nur csv-Datein</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary" id="upload_eort">Hochladen</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            <div class="row">
+                {% if perms.WZO_App.add_vehicle %}
+                <div class="col">
+                    <form class='import_form' method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col">
+                                <h3>Fahrzeug-Import</h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <a href="/static/samples/vehicle.csv" class="btn btn-info" id="sample_veh">Beispieldatei</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="import_veh" class="form-label">Datei auswählen</label>
+                                <input class="form-control" type="file" accept=".csv" id="import_veh" name="import_veh">
+                                <div id="import_veh_help" class="form-text">Erlaubt sind nur csv-Datein</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary" id="upload_veh">Hochladen</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+                {% if perms.WZO_App.add_workshop %}
+                <div class="col">
+                    <form class='import_form' method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col">
+                                <h3>Werkstatt-Import</h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <a href="/static/samples/workshops.csv" class="btn btn-info" id="sample_ws">Beispieldatei</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="import_veh" class="form-label">Datei auswählen</label>
+                                <input class="form-control" type="file" accept=".csv" id="import_ws" name="import_ws">
+                                <div id="import_ws_help" class="form-text">Erlaubt sind nur csv-Datein</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary" id="upload_ws">Hochladen</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            <div class="row">
+                {% if perms.WZO_App.add_allocation %}
+                <div class="col">
+                    <form class='import_form' method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col">
+                                <h3>Regel-Import</h3>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <a href="/static/samples/rules.csv" class="btn btn-info" id="sample_rules">Beispieldatei</a>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label for="import_rules" class="form-label">Datei auswählen</label>
+                                <input class="form-control" type="file" accept=".csv" id="import_rules" name="import_rules">
+                                <div id="import_rules_help" class="form-text">Erlaubt sind nur csv-Datein</div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <button type="submit" class="btn btn-primary" id="upload_rules">Hochladen</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+{% endblock maincontent %}

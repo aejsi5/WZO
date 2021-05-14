@@ -1,0 +1,13 @@
+{% autoescape off %}
+Hi {{ user}},
+
+Du hast gerade dein Passwort zurückgesetzt. Klicke auf den Link unten, um ein neues Passwort zu vergeben.
+
+{{ protocol }}://{{ domain }}{% url 'Reset-Password' uidb64=uid token=token %}
+
+Sollte der Link oben nicht funktionieren, so kopieren Sie bitte den Link in ein neues Browserfenster.
+Vielen Dank!
+
+Viele Grüße,
+Arugula
+{% endautoescape %}

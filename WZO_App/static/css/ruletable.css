@@ -1,0 +1,136 @@
+.ruletbl-div{
+    padding-left: 12px;
+    padding-right: 12px;
+    width: 100%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+}
+.rtable-search-input{
+    width: 100%;
+    height: 100%;
+}
+.ruletbl-thead{
+    background-color: #FFF;
+    width: calc(100% - 17px);
+    font-weight: bold;
+    border-bottom: 1.6px solid #777777;
+}
+.ruletbl-th, .ruletbl-td{
+    height: 100%;
+    border-right: 1.2px solid #ABABAB;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0px 5px 0px 5px;
+}
+.ruletbl-thr{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    height: 26px;
+    background-color: #FFF;
+}
+.ruletbl-tr{
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    height: 26px;
+    background-color: #f9f9f9;
+    border-bottom: 1.2px solid #ABABAB;
+}
+.ruletbl-tr-alt{
+    background-color: #FFF;
+    border-bottom: 1.2px solid #ABABAB;
+}
+.ruletbl-col1{
+    width: 3%
+}
+.ruletbl-col2{
+    width: 5%;
+}
+.ruletbl-col3{
+    width: 5%;
+}
+.ruletbl-col4{
+    width: 5%;
+}
+.ruletbl-col5{
+    width: 6%;
+}
+.ruletbl-col6{
+    width: 8%;
+}
+.ruletbl-col7{
+    width: 8%;
+}
+.ruletbl-col8{
+    width: 8%;
+}
+.ruletbl-col9{
+    width: 7%;
+}
+.ruletbl-col10{
+    width: 6%;
+}
+.ruletbl-col11{
+    width: 5%;
+}
+.ruletbl-col12{
+    width: 6%;
+}
+.ruletbl-col13{
+    width: 6%;
+}
+.ruletbl-col14{
+    width: 12%;
+}
+.ruletbl-col15{
+    width: 7%;
+}
+.ruletbl-col16{
+    width: 3%;
+}
+.ruletbl-tbody{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+}
+.rrule-draw{
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--primary);
+}
+.rrule-draw:hover{
+    color: #0056b3;
+}
+.rrule-draw-all{
+    font-size: 1rem;
+    cursor: pointer;
+    color: var(--primary);
+}
+.rrule-draw-all:hover{
+    color: #0056b3;
+}
+.ruletbl-loader{
+    display: block;
+    top: 125px;
+    font-size: 1.5rem;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: flex;
+    background-color: rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px 7px rgba(0,0,0,0.1);
+    backdrop-filter: blur(3px);
+}
+.ruletbl-loader > .spinner-border{
+    margin:4rem auto;
+    width: 4rem;
+    height: 4rem;
+}
+.ruletbl-loader-noshow{
+    display: none;
+}

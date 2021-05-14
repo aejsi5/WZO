@@ -1,0 +1,59 @@
+{% extends 'WZO_App/base.html' %}
+{% block maincontent %}
+<section class="settings">
+    <ul class="nav nav-tabs ul-order-body">
+        <li class="nav-item">
+            <a class="nav-link active" href="#profile" id="profile-tab" data-toggle="tab" role="tab"
+                aria-controls="profile" aria-selected="true">Einstellungen</a>
+        </li>
+        {% if perms.WZO_App.change_wzo_user %}
+        <li class="nav-item">
+            <a class="nav-link" href="#newuser" id="newuser-tab" data-toggle="tab" role="tab" aria-controls="newuser"
+                aria-selected="false">Benutzerverwaltung</a>
+        </li>
+        {% endif %}
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane fade show active profile-tab" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <form method="POST">
+                {% csrf_token %}
+                {{profile_form.as_table}}
+                <div class="form-controls">
+                    <button class="btn btn-primary" type="submit">Speichern</button>
+                    <a class="btn btn-warning" role="button" href="{{reset_link}}">Passwort ändern</a>
+                </div>
+            </form>
+        </div>
+        {% if perms.WZO_App.change_wzo_user %}
+        <div class="tab-pane fade newuser-tab" id="newuser" role="tabpanel" aria-labelledby="newuser-tab">
+                <div class="card-container">
+                    <div class="row">
+                        {% for i in new_user %}
+                        <div class="card" style="width: 18rem; margin-bottom: 1rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{i.first_name}} {{i.last_name}}</h5>
+                                <p class="card-text">Der Benutzer hat sich neu registriert. Du kannst ihn/sie freischalten oder löschen.</p>
+                                <p class="card-text">{{i.email}}</p>
+                                <a href="?user={{i.pk}}&action=activate" class="btn btn-primary">Freischalten</a>
+                                <a href="?user={{i.pk}}&action=delete" class="btn btn-danger">Löschen</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% for i in active_user %}
+                        <div class="card" style="width: 18rem; margin-bottom: 1rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">{{i.first_name}} {{i.last_name}}</h5>
+                                <p class="card-text">Der Benutzer ist bereits freigeschaltet. Du kannst ihn sperren.</p>
+                                <p class="card-text">{{i.email}}</p>
+                                <a href="?user={{i.pk}}&action=deactivate" class="btn btn-warning">Sperren</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock maincontent %}

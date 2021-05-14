@@ -1,0 +1,38 @@
+{% extends 'WZO_App/registration/base.html' %}
+
+{% block maincontent %}
+
+
+<!--Register-->
+<div class="register-container">
+    <h3>Neues Passwort</h3>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group row reg-row">
+            {{reset.email.label}}
+            {{reset.email}}
+            {% for error in reset.email.errors %}
+            <small style="color: red">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="form-group row reg-row">
+            {{reset.password1.label}}
+            {{reset.password1}}
+            {% for error in reset.password1.errors %}
+            <small style="color: red">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <div class="form-group row reg-row">
+            {{reset.password2.label}}
+            {{reset.password2}}
+            {% for error in reset.password2.errors %}
+            <small style="color: red">{{ error }}</small>
+            {% endfor %}
+        </div>
+        <br>
+        <div class="reg-controls">
+            <button class="btn btn-primary" type="submit">Abschicken</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

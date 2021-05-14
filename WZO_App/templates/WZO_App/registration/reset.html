@@ -1,0 +1,23 @@
+{% extends 'WZO_App/registration/base.html' %}
+
+{% block maincontent %}
+
+<!--Register-->
+<div class="register-container">
+    <h3>Passwort Zurücksetzen</h3>
+    <form method="POST">
+        {% csrf_token %}
+        {{reset.as_table}}
+        <br>
+        <div class="reg-controls">
+            <button class="btn btn-primary" type="submit">Zurücksetzen</button>
+        </div>
+    </form>
+    <p class="text-center">If you already have an account, <a href="/login">login</a> instead.</p>
+</div>
+{% if submit %}
+<div class="error-login">
+    Link zum Zurücksetzen des Passworts verschickt
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% autoescape off %}
+Hi {{ user}},
+
+Du hast dich gerade bei Arugula registriert. Bitte bestätige deine E-Mail-Adresse, indem du auf den Link unten klickst.
+Im nächsten Schritt muss ein Kollege dich für die Benutzung freischalten.
+Sobald das geschehen ist, schicke ich dir eine Mail.
+
+{{ protocol }}://{{ domain }}{% url 'Activate' uidb64=uid token=token %}
+
+Sollte der Link oben nicht funktionieren, so kopieren Sie bitte den Link in ein neues Browserfenster.
+Vielen Dank!
+
+Viele Grüße,
+Arugula
+{% endautoescape %}
