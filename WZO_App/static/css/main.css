@@ -370,3 +370,19 @@ li.disabled{
 .form-controls{
     margin-top: 1rem;
 }
+.traffic-light{
+    border-radius: 10px;
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    margin-right: 10px;
+}
+.red{
+    background-color: red;
+}
+.green{
+    background-color: green;
+}
+.traffic-light-des{
+    font-weight: bold;
+}

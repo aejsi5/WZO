@@ -569,8 +569,8 @@ class HealthCheck(View):
         if request.user.is_authenticated:
             services = {'Google':True}
             try:
-                geocode_result = gmaps.geocode("")
-            except googlemaps.exceptions.HTTPError as e:
+                geocode_result = gmaps.geocode("Helmholtzstrasse 3 30165 Hannover Deutschland")
+            except:
                 services['Google'] = False
             return render(request, self.template_name, context=services)
         else:
