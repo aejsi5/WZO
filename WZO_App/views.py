@@ -567,8 +567,9 @@ class HealthCheck(View):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            geocode_result = gmaps.geocode("Helmholtzstraße 3 30165 Hannover Deutschland")
+            geocode_result = gmaps.geocode("")
             print(geocode_result)
+            status_google = geocode_result[0]
             return render(request, self.template_name)
         else:
             return HttpResponse(status=403)
