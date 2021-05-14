@@ -33,11 +33,7 @@ import json
 import io
 import csv
 import googlemaps
-<<<<<<< HEAD
 gmaps = googlemaps.Client(key=settings.WZO_OPTIONS['GOOGLE_TOKEN'])
-=======
-gmaps = googlemaps.Client(key='###')
->>>>>>> 3c552d74175447f219423ccb77952f890ad4a765
 log = logging.getLogger(__name__)
 
 # Create your views here.
