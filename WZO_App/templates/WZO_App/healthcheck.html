@@ -4,9 +4,14 @@
     <div class="card-container">
         <div class="card" style="width: 18rem; margin-top: 2rem;">
             <div class="card-body">
-                <h5 class="card-title">Healthcheck</h5>
-                <p class="card-text">Der Prozess wird im Hintergrund ausgeführt und dauert mehrere Stunden. Ein Abbruch ist nicht möglich.</p>
-                <a href="#" class="btn btn-primary">Go somewhere</a>
+                <h5 class="card-title">Google</h5>
+                {% if Google %}
+                <p class="card-text">Alles tutti.</p>
+                <span class="traffic-light green"></span><span class="traffic-light-des">Running</span>
+                {% else %}
+                <p class="card-text">Der Service ist aktuell nicht erreichbar. Bitte prüfen!</p>
+                <span class="traffic-light red"></span><span class="traffic-light-des">Not Running</span>
+                {% endif %}
             </div>
         </div>
     </div>

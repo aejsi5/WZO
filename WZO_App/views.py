@@ -567,12 +567,12 @@ class HealthCheck(View):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
+            services = {'Google':True}
             try:
                 geocode_result = gmaps.geocode("")
             except googlemaps.exceptions.HTTPError as e:
-                print(e)
-            status_google = geocode_result[0]
-            return render(request, self.template_name)
+                services['Google'] = False
+            return render(request, self.template_name, context=services)
         else:
             return HttpResponse(status=403)
 
