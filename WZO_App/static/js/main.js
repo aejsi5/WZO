@@ -143,7 +143,7 @@ $(document).ready(function(){
         var wst = $(this).parents('.ruletbl-tr').find('.ruletbl-col13').text()
         var circle = L.circle([lat, lng], { radius: radius, color: ci.get(wst), opacity: 0.8 }).bindPopup();
         circle.on('click', function () {
-            circle_click(circle)
+            circle_click(circle, wst)
         })
         circle_markers.addLayer(circle);
         circle_markers.addTo(mymap);
@@ -158,7 +158,7 @@ $(document).ready(function(){
             var wst = $(this).find('.ruletbl-col13').text()
             var circle = L.circle([lat, lng], { radius: radius, color: ci.get(wst), opacity: 0.8 }).bindPopup();
             circle.on('click', function () {
-                circle_click(circle)
+                circle_click(circle, wst)
             })
             circle_markers.addLayer(circle);
             circle_markers.addTo(mymap);
@@ -175,11 +175,11 @@ function eraser(on){
     }
 }
 
-function circle_click(e){
+function circle_click(e, wst=null){
     console.log(e)
     var $markup = $(
         "<div>"+
-            "<div class='circle-popup-div'><span class='circle-popup-lat'></span><span class='circle-popup-lng'></span><span class='circle-popup-radius'></span></div>"+
+            "<div class='circle-popup-div'><span class='circle-popup-lat'></span><span class='circle-popup-lng'></span><span class='circle-popup-radius'></span></span><span class='circle-popup-wst'></span></div>"+
             "<div class='circle-range'>"+
                 "<input type='range' class='form-range circle-popup-range' min='10' max='30000' value='" + e.getRadius() + "' id='circle_"+ e._leaflet_id +"'>"+
             "</div>"+
@@ -189,6 +189,9 @@ function circle_click(e){
     $markup.find('.circle-popup-lat').text("Lat:" + Number(e.getLatLng()["lat"]).toFixed(6));
     $markup.find('.circle-popup-lng').text("Lng:" + Number(e.getLatLng()["lng"]).toFixed(6));
     $markup.find('.circle-popup-radius').text("Radius:" + Number(e.getRadius()).toFixed(1) + "Meter");
+    if(wst!=null){
+        $markup.find('.circle-popup-wst').text("Werkstatt:" + wst);
+    }
     var selector = '#circle_'+ e._leaflet_id;
     $(document).on('input',selector,function(){
         var p = $(this).parents('.leaflet-popup-content');
