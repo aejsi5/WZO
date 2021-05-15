@@ -28,6 +28,7 @@ from .serializer import *
 from .rules import *
 from .tokens import account_activation_token, account_reset_token
 from .forms import *
+from .tasks import *
 import logging
 import json
 import io
@@ -84,6 +85,8 @@ class Registration(View):
         return render (request, self.template_name, context={"register_form":form})
     
     def send_verification_mail(self, request, to):
+        from time import sleep
+        sleep(20)
         subject = "Arugula - Bitte bestätige deine Email-Adresse"
         current_site = get_current_site(request)
         message = render_to_string('registration/email_verification.html', {
