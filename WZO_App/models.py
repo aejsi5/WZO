@@ -1,5 +1,6 @@
 from django.db import models
 import os
+from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
