@@ -86,9 +86,8 @@ class Registration(View):
             return redirect("/")
         return render (request, self.template_name, context={"register_form":form})
     
+    #DEPRECIATED
     def send_verification_mail(self, request, to):
-        from time import sleep
-        sleep(20)
         subject = "Arugula - Bitte bestätige deine Email-Adresse"
         current_site = get_current_site(request)
         message = render_to_string('registration/email_verification.html', {
@@ -117,11 +116,14 @@ class Reset(View):
             email = form.cleaned_data['email']
             try:
                 user = WZO_User.objects.get(email=email)
-                self.send_reset_mail(request,user)
+                current_site = get_current_site(request)
+                send_reset_mail.delay(current_site.domain, user.pk)
+                #self.send_reset_mail(request,user)
             except:
                 pass
         return render (request, self.template_name, context={"reset":form, "submit": True})
 
+    #DEPRECIATED
     def send_reset_mail(self, request, touser):
         subject = "Arugula - Passwort Zurücksetzen"
         current_site = get_current_site(request)
@@ -153,7 +155,6 @@ class PasswordReset(View):
         ruser = request.user
         user = self.check_token(uidb64,token)
         nextpage = request.GET.get('next', '/')
-        print(nextpage)
         if user is not None:
             form = NewPasswordForm(data={'email':user.email, 'password1': request.POST.get('password1'), 'password2': request.POST.get('password2')})
             if not form.is_valid():
@@ -783,8 +784,9 @@ class WZOUser_Api(APIView):
     def delete(self,request,pk, *args, **kwargs):
         if request.user.has_perm('WZO_App.delete_wzo_user'):
             user = WZO_User.objects.get(pk=pk)
+            send_delete_mail.delay(user.pk)
             user.delete()
-            self.send_delete_mail(user)
+            #self.send_delete_mail(user)
             return Response(status=200)
         else:
             return Response(status=403)
@@ -795,7 +797,8 @@ class WZOUser_Api(APIView):
             group = Group.objects.get(name='RIV-Manager')
             user.groups.add(group)
             user.save()
-            self.send_activation_mail(user)
+            send_activation_mail.delay(user.pk)
+            #self.send_activation_mail(user)
             return Response(status=202)
         else:
             return Response(status=403)
@@ -806,11 +809,13 @@ class WZOUser_Api(APIView):
             group = Group.objects.get(name='RIV-Manager')
             user.groups.remove(group)
             user.save()
-            self.send_deactivation_mail(user)
+            send_deactivation_mail.delay(user.pk)
+            #self.send_deactivation_mail(user)
             return Response(status=202)
         else:
             return Response(status=403)
 
+    #DEPRECIATED
     def send_activation_mail(self, touser):
         subject = "Arugula - Du wurdest freigeschaltet"
         message = render_to_string('registration/email_activated.html', {
@@ -822,6 +827,7 @@ class WZOUser_Api(APIView):
         email.send()
         return 
 
+    #DEPRECIATED
     def send_deactivation_mail(self, touser):
         subject = "Arugula - Du wurdest gesperrt"
         message = render_to_string('registration/email_deactivated.html', {
@@ -833,6 +839,7 @@ class WZOUser_Api(APIView):
         email.send()
         return 
     
+    #DEPRECIATED
     def send_delete_mail(self, touser):
         subject = "Arugula - Dein Account wurde gelöscht"
         message = render_to_string('registration/email_deleted.html', {
@@ -842,98 +849,7 @@ class WZOUser_Api(APIView):
                         subject, message, to=[touser.email]
             )
         email.send()
-        return 
-
-#DEPRECIATED!!!!!
-class DEP_WTRules(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, format=None):
-        with open(os.path.join(settings.MEDIA_ROOT, 'wt_rules', '20210418_182449' + '.json'), "r", encoding='utf-8') as f:
-            self.jdata = json.load(f)
-        params = request.GET
-        if params:
-            res = {
-                'data': self.search(params)
-            }
-        else:
-            res = {
-                'data': self.jdata
-            }
-        return Response(res)
-    
-    def search(self, params):
-        search = {}
-        result = []
-        for key in params:
-            if key in ['make', 'workshop', 'address', 'note']:
-                val = params.get(key, None)
-                search[key] = val
-        for i in self.jdata:
-            if 'make' in search:
-                m = self.check_make(i['rule']['make'],search['make'])
-                if not m:
-                    continue
-            if 'workshop' in search:
-                m = self.check_workshop(i['rule']['kuerzel'],search['workshop'])
-                if not m:
-                    continue
-            if 'address' in search:
-                m = self.check_address(i['rule']['address'],search['address'])
-                if not m:
-                    continue
-            if 'note' in search:
-                m = self.check_address(i['rule']['note'],search['note'])
-                if not m:
-                    continue
-            result.append(i)
-        return result
-            
-
-    def check_make(self, rule_make, param_make):
-        if rule_make is None:
-            return True
-        elif param_make in rule_make:
-            return True
-        elif not param_make[0] == '%' and param_make[-1] == '%':
-            return rule_make[0].startswith(param_make[:-1])
-        elif param_make[0] == '%' and not param_make[-1] == '%':
-            return rule_make[0].endswith(param_make[1:])
-        else:
-            return False
-
-    def check_workshop(self, rule_ws, param_ws):
-        if rule_ws is None:
-            return True
-        elif param_ws in rule_ws:
-            return True
-        else:
-            return False
-    
-    def check_address(self, rule_address, param_address):
-        if rule_address is None:
-            return False
-        elif param_address in rule_address:
-            return True
-        elif not param_address[0] == '%' and param_address[-1] == '%':
-            return rule_address[0].startswith(param_address[:-1])
-        elif param_address[0] == '%' and not param_address[-1] == '%':
-            return rule_address[0].endswith(param_address[1:])
-        else:
-            return False
-
-    def check_note(self, rule_note, param_note):
-        if rule_note is None:
-            return False
-        elif param_note in rule_note:
-            return True
-        elif not param_note[0] == '%' and param_note[-1] == '%':
-            return rule_note[0].startswith(param_note[:-1])
-        elif param_note[0] == '%' and not param_note[-1] == '%':
-            return rule_note[0].endswith(param_note[1:])
-        else:
-            return False
-                
+        return                
     
 
 
