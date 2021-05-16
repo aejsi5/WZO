@@ -248,8 +248,8 @@ class Settings(View):
         else:
             return HttpResponse(status=403)
         if request.user.has_perm('WZO_App.change_wzo_user'):
-            active_user = WZO_User.objects.filter(groups__name__in=['RIV-Manager'],is_staff=False,is_superuser=False).exclude(groups__name__in=['RIV-Admin', 'Developer'])
-            new_user = WZO_User.objects.filter(is_staff=False,is_superuser=False).exclude(groups__name__in=['RIV-Admin', 'Developer', 'RIV-Manager'], pk__in=active_user)
+            active_user = WZO_User.objects.filter(groups__name__in=['RIV-Manager'],is_staff=False,is_superuser=False, is_active=True).exclude(groups__name__in=['RIV-Admin', 'Developer'])
+            new_user = WZO_User.objects.filter(is_staff=False,is_superuser=False, is_active=True).exclude(groups__name__in=['RIV-Admin', 'Developer', 'RIV-Manager'], pk__in=active_user)
         else:
             active_user = None
             new_user = None
