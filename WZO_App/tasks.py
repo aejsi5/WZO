@@ -3,6 +3,7 @@ from time import sleep
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
 from .tokens import account_activation_token, account_reset_token
+from .models import *
 from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.mail import EmailMessage
@@ -14,8 +15,9 @@ def wait():
     return "DONE"
 
 @shared_task
-def send_verification_mail(domain, user):
+def send_verification_mail(domain, userpk):
     sleep(20)
+    user = WZO_User.objects.get(pk=userpk)
     subject = "Arugula - Bitte bestätige deine Email-Adresse"
     message = render_to_string('registration/email_verification.html', {
             'user': user.first_name,
