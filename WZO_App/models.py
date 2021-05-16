@@ -1,4 +1,6 @@
 from django.db import models
+import os
+BASE_DIR = Path(__file__).resolve().parent.parent
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
 from django.core.files.storage import FileSystemStorage
@@ -144,7 +146,7 @@ class Allocation(models.Model):
         app_label = "WZO_App"
         unique_together = ('a_type', 'v_id')
 
-fs = FileSystemStorage(location='/media/uploads')
+fs = FileSystemStorage(location=os.path.join(BASE_DIR, 'WZO_App', 'media','uploads'))
 
 class Upload(models.Model):
     upload_id = models.AutoField('ID', primary_key=True)
