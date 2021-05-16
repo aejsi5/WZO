@@ -14,19 +14,18 @@ def wait():
     return "DONE"
 
 @shared_task
-def send_verification_mail(request, to):
+def send_verification_mail(domain, user):
     sleep(20)
     subject = "Arugula - Bitte bestätige deine Email-Adresse"
-    current_site = get_current_site(request)
     message = render_to_string('registration/email_verification.html', {
-            'user': request.user.first_name,
+            'user': user.first_name,
             'protocol': settings.DEFAULT_PROTOCOL,
-            'domain': current_site.domain,
-            'uid':urlsafe_base64_encode(force_bytes(request.user.pk)),
-            'token':account_activation_token.make_token(request.user),
+            'domain': domain,
+            'uid':urlsafe_base64_encode(force_bytes(user.pk)),
+            'token':account_activation_token.make_token(user),
         })
     email = EmailMessage(
-                    subject, message, to=[to]
+                    subject, message, to=[user.email]
         )
     email.send()
     return 

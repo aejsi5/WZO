@@ -80,7 +80,9 @@ class Registration(View):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            send_verification_mail.delay(request,user.email)
+            current_site = get_current_site(request)
+            send_verification_mail.delay(current_site.domain, request.user)
+            #self.send_verification_mail.(request,user.email)
             return redirect("/")
         return render (request, self.template_name, context={"register_form":form})
     
