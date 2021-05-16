@@ -784,8 +784,10 @@ class WZOUser_Api(APIView):
     def delete(self,request,pk, *args, **kwargs):
         if request.user.has_perm('WZO_App.delete_wzo_user'):
             user = WZO_User.objects.get(pk=pk)
-            send_delete_mail.delay(user.pk)
+            first = user.first_name
+            email = user.email
             user.delete()
+            send_delete_mail.delay(first, email)
             #self.send_delete_mail(user)
             return Response(status=200)
         else:

@@ -69,14 +69,13 @@ def send_deactivation_mail(userpk):
     return 
 
 @shared_task
-def send_delete_mail(userpk):
-    user = WZO_User.objects.get(pk=userpk)
+def send_delete_mail(user_first, user_mail):
     subject = "Arugula - Dein Account wurde gelöscht"
     message = render_to_string('registration/email_deleted.html', {
-            'user': user.first_name,
+            'user': user_first,
         })
     email = EmailMessage(
-                    subject, message, to=[user.email]
+                    subject, message, to=[user_mail]
         )
     email.send()
     return 

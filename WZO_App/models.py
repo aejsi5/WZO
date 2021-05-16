@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
+from django.core.files.storage import FileSystemStorage
 
 # Create your models here.
 class WZO_User(AbstractUser):
@@ -142,6 +143,20 @@ class Allocation(models.Model):
     class Meta:
         app_label = "WZO_App"
         unique_together = ('a_type', 'v_id')
+
+fs = FileSystemStorage(location='/media/uploads')
+
+class Uploads(models.Model):
+    upload_id = models.AutoField('ID', primary_key=True)
+    pattern = models.CharField('Datei-Typ',max_length=255, null=False, blank=False)
+    inserted = models.DateTimeField('Angelegt',auto_now_add=True, null=False, blank=False)
+    record = models.FileField(storage=fs)
+
+    def __str__(self):
+        return str(self.upload_id)
+
+    class Meta:
+        app_label = "WZO_App"
 
 
 
