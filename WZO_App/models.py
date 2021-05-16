@@ -146,7 +146,7 @@ class Allocation(models.Model):
 
 fs = FileSystemStorage(location='/media/uploads')
 
-class Uploads(models.Model):
+class Upload(models.Model):
     upload_id = models.AutoField('ID', primary_key=True)
     pattern = models.CharField('Datei-Typ',max_length=255, null=False, blank=False)
     inserted = models.DateTimeField('Angelegt',auto_now_add=True, null=False, blank=False)

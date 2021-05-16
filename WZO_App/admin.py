@@ -30,4 +30,5 @@ admin.site.register(Vehicle, VehicleAdmin)
 admin.site.register(Workshop, WorkshopAdmin)
 admin.site.register(Allocation)
 admin.site.register(RuleWT)
+admin.site.register(Upload)
 
