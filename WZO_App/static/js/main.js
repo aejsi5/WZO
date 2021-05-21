@@ -241,7 +241,7 @@ function create_query_string_rules() {
     if(query=='?'){
         return null
     }
-    return query
+    return encodeURI(query)
 }
     
 function close_slide_rule(){
@@ -321,7 +321,7 @@ function create_query_string(){
     if(query=='?'){
         return null
     }
-    return query.replace(' ','+')
+    return encodeURI(query.replace(' ','+'))
 };
 
 function create_eorte(jsobj){
