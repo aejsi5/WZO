@@ -269,31 +269,31 @@ function create_query_string(){
     if(region != ''){
         query = query + '&region=' + region
     }
-    var name = $('#inp_name').val().replace(' ', '')
+    var name = $('#inp_name').val().replace(' ', '%20')
     if (name != '') {
         query = query + '&name=' + name
     }
-    var zip = $('#inp_zip_code').val().replace(' ', '')
+    var zip = $('#inp_zip_code').val().replace(' ', '%20')
     if (zip != '') {
         query = query + '&zip_code=' + zip
     }
-    var city = $('#inp_city').val().replace(' ', '')
+    var city = $('#inp_city').val().replace(' ', '%20')
     if (city != '') {
         query = query + '&city=' + city
     }
-    var ikz = $('#inp_ikz').val().replace(' ', '')
+    var ikz = $('#inp_ikz').val().replace(' ', '%20')
     if (ikz != '') {
         query = query + '&ikz=' + ikz
     }
-    var objno = $('#inp_objno').val().replace(' ', '')
+    var objno = $('#inp_objno').val().replace(' ', '%20')
     if (objno != '') {
         query = query + '&objno=' + objno
     }
-    var make = $('#inp_make').val().replace(' ', '')
+    var make = $('#inp_make').val().replace(' ', '%20')
     if (make != '') {
         query = query + '&make=' + make
     }
-    var model = $('#inp_model').val().replace(' ', '')
+    var model = $('#inp_model').val().replace(' ', '%20')
     if (model != '') {
         query = query + '&model=' + model
     }
@@ -301,7 +301,7 @@ function create_query_string(){
     if (reg_date != '') {
         query = query + '&reg_date=gte__' + reg_date
     }
-    var age = $('#inp_age').val().replace(' ', '').replace('.','').replace(',', '')
+    var age = $('#inp_age').val().replace(' ', '%20').replace('.','').replace(',', '')
     if (age != '') {
         var operator = $('#operator').val()
         if(operator =='='){
