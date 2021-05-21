@@ -314,6 +314,8 @@ class Import(View):
                 ctx = {}
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
+            filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + "." + ext
+            upload = Upload.objects.create()
             self.import_eort(csv_file)
         elif 'import_veh' in request.FILES:
             csv_file = request.FILES['import_veh']
@@ -323,6 +325,7 @@ class Import(View):
                 ctx = {}
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
+            filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + "." + ext
             self.import_veh(csv_file)
         elif 'import_zips' in request.FILES:
             csv_file = request.FILES['import_zips']
@@ -332,6 +335,7 @@ class Import(View):
                 ctx = {}
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
+            filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + "." + ext
             self.import_zip_codes(csv_file)
         elif 'import_ws' in request.FILES:
             csv_file = request.FILES['import_ws']
@@ -341,6 +345,7 @@ class Import(View):
                 ctx = {}
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
+            filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + "." + ext
             self.import_workshops(csv_file)
         elif 'import_rules' in request.FILES:
             csv_file = request.FILES['import_rules']
@@ -350,6 +355,7 @@ class Import(View):
                 ctx = {}
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
+            filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + "." + ext
             self.import_rules(csv_file)
         return render(request, self.template_name)
 
@@ -656,6 +662,7 @@ class Eort_List_Api(APIView):
             if key in ['lat', 'lng', 'name', 'street', 'zip_code', 'city', 'region']:
                 is_relevant = True
                 val = params.get(key, None).split(',')
+                log.debug('Eort Query: Eort Param {} - {}',format(key,val))
                 query.add(self.or_operator(key, val),Q.AND)
         if is_relevant:
             return query 
@@ -672,6 +679,7 @@ class Eort_List_Api(APIView):
             if key in ['ikz', 'objno', 'make', 'model', 'reg_date', 'age', 'service_contract']:
                 is_relevant = True
                 val = params.get(key, None).split(',')
+                log.debug('Eort Query: Vehicle Param {} - {}',format(key,val))
                 query.add(self.or_operator(key, val),Q.AND)
         if is_relevant:
             return query 
