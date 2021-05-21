@@ -265,35 +265,35 @@ function close_slide_veh() {
 
 function create_query_string(){
     var query = '?'
-    var region = $('#inp_region').val().replace(', ',',')
+    var region = $('#inp_region').val
     if(region != ''){
         query = query + '&region=' + region
     }
-    var name = $('#inp_name').val().replace(' ', '%20')
+    var name = $('#inp_name').val()
     if (name != '') {
         query = query + '&name=' + name
     }
-    var zip = $('#inp_zip_code').val().replace(' ', '%20')
+    var zip = $('#inp_zip_code').val()
     if (zip != '') {
         query = query + '&zip_code=' + zip
     }
-    var city = $('#inp_city').val().replace(' ', '%20')
+    var city = $('#inp_city').val()
     if (city != '') {
         query = query + '&city=' + city
     }
-    var ikz = $('#inp_ikz').val().replace(' ', '%20')
+    var ikz = $('#inp_ikz').val()
     if (ikz != '') {
         query = query + '&ikz=' + ikz
     }
-    var objno = $('#inp_objno').val().replace(' ', '%20')
+    var objno = $('#inp_objno').val()
     if (objno != '') {
         query = query + '&objno=' + objno
     }
-    var make = $('#inp_make').val().replace(' ', '%20')
+    var make = $('#inp_make').val()
     if (make != '') {
         query = query + '&make=' + make
     }
-    var model = $('#inp_model').val().replace(' ', '%20')
+    var model = $('#inp_model').val()
     if (model != '') {
         query = query + '&model=' + model
     }
@@ -301,7 +301,7 @@ function create_query_string(){
     if (reg_date != '') {
         query = query + '&reg_date=gte__' + reg_date
     }
-    var age = $('#inp_age').val().replace(' ', '%20').replace('.','').replace(',', '')
+    var age = $('#inp_age').val().replace('.','').replace(',', '')
     if (age != '') {
         var operator = $('#operator').val()
         if(operator =='='){
@@ -321,7 +321,7 @@ function create_query_string(){
     if(query=='?'){
         return null
     }
-    return encodeURI(query.replace(' ','+'))
+    return encodeURI(query)
 };
 
 function create_eorte(jsobj){
