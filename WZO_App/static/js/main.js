@@ -265,7 +265,7 @@ function close_slide_veh() {
 
 function create_query_string(){
     var query = '?'
-    var region = $('#inp_region').val
+    var region = $('#inp_region').val()
     if(region != ''){
         query = query + '&region=' + region
     }
