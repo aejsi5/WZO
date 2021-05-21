@@ -662,7 +662,8 @@ class Eort_List_Api(APIView):
             if key in ['lat', 'lng', 'name', 'street', 'zip_code', 'city', 'region']:
                 is_relevant = True
                 val = params.get(key, None).split(',')
-                log.debug('Eort Query: Eort Param {} - {}',format(key,val))
+                log.debug('Eort Query: Eort Param {}',format(key))
+                log.debug(val)
                 query.add(self.or_operator(key, val),Q.AND)
         if is_relevant:
             return query 
@@ -679,7 +680,8 @@ class Eort_List_Api(APIView):
             if key in ['ikz', 'objno', 'make', 'model', 'reg_date', 'age', 'service_contract']:
                 is_relevant = True
                 val = params.get(key, None).split(',')
-                log.debug('Eort Query: Vehicle Param {} - {}',format(key,val))
+                log.debug('Eort Query: Vehicle Param {}',format(key))
+                log.debug(val)
                 query.add(self.or_operator(key, val),Q.AND)
         if is_relevant:
             return query 
