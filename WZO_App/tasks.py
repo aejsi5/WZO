@@ -89,7 +89,6 @@ def import_zip_codes(fileid):
     log.info("ZipImporter started. Upload-PK: {}".format(fileid))
     csvf = Upload.objects.get(pk=fileid)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
-        content = []
         next(f,None) #Skip Header
         reader = csv.DictReader(f,fieldnames=('osm_id', 'ort', 'plz', 'bundesland'),delimiter=';')
         Zip_Code.objects.all().delete()
@@ -107,6 +106,7 @@ def import_zip_codes(fileid):
     csvf.finished = True
     csvf.save()
     log.debug("Task completed")
+    print("")
     print("Fertig")
     return
 
@@ -116,11 +116,10 @@ def get_zip_obj(zip_code):
 
 @shared_task
 def import_workshops(fileid):
-    log.info("Workshop Importer started")
+    log.info("Workshop Importer started.Upload-PK: {}".format(fileid))
     csvf = Upload.objects.get(pk=fileid)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
         next(f,None) #Skip Header
-        content = []
         count_created = 0
         count_updated = 0
         count_error = 0
@@ -147,5 +146,6 @@ def import_workshops(fileid):
     csvf.finished = True
     csvf.save()
     log.debug("Task completed")
+    print("")
     print("Fertig")
     return

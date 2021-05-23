@@ -346,6 +346,7 @@ class Import(View):
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
             upload = Upload.objects.create(pattern="WorkshopImport", record=csv_file)
+            import_workshops.delay(upload.pk)
             #self.import_workshops(csv_file)
         elif 'import_rules' in request.FILES:
             csv_file = request.FILES['import_rules']
