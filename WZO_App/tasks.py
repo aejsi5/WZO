@@ -9,6 +9,8 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 import csv
 import logging
+import googlemaps
+gmaps = googlemaps.Client(key=settings.WZO_OPTIONS['GOOGLE_TOKEN'])
 log = logging.getLogger(__name__)
 
 
@@ -105,7 +107,7 @@ def import_zip_codes(fileid):
             print("DONE: {}".format(counter),end="\r")
     csvf.finished = True
     csvf.save()
-    log.debug("Task completed")
+    log.info("Task completed")
     print("")
     print("Fertig")
     return
@@ -139,13 +141,101 @@ def import_workshops(fileid):
                 log.debug("Error occured")
                 log.debug(content)
                 log.error(e)
+                count_error += 1
                 pass
             print("DONE: {}".format(counter),end="\r")
     Workshop.objects.filter(deleted=True).delete()
-    log.info("{} Workshops created, {} Vehicles updated, {} failed to update/create".format(count_created, count_updated, count_error))
+    log.info("{} Workshops created, {} Workshops updated, {} failed to update/create".format(count_created, count_updated, count_error))
     csvf.finished = True
     csvf.save()
-    log.debug("Task completed")
+    log.info("Task completed")
+    print("")
+    print("Fertig")
+    return
+
+def get_eort_by_fm_eort_id(fm_eort_id):
+    try:
+        obj = Eort.objects.get(fm_eort_id=fm_eort_id)
+        return obj
+    except:
+        return None
+
+def norm_street(street: str) -> str:
+    street = street.lower()
+    street = street.replace('ä', 'ae').replace('ö','oe').replace('ü', 'ue').replace('ß', 'ss')
+    street = street.replace('str.', 'strasse')
+    street = street.replace('  ', '')
+    return street
+
+def get_lat_lng(cityobj, street):
+    if cityobj is not None:
+        address = street + " " + cityobj.zip_code + " " + cityobj.state
+    else:
+        return {'lat': None, 'lng': None}
+    geocode_result = gmaps.geocode(address)
+    if geocode_result:
+        return geocode_result[0]['geometry']['location']
+    else:
+        return {'lat': None, 'lng': None}
+
+def update_eort(old_obj, new_obj):
+    update_geo = False
+    if old_obj.street != new_obj['street'] or old_obj.zip_code != new_obj['zip_code']:
+        update_geo = True
+    old_obj.name = new_obj['name']
+    old_obj.street = new_obj['street']
+    old_obj.region = new_obj['region']
+    old_obj.zip_code = new_obj['zip_code']
+    old_obj.city = new_obj['city']
+    old_obj.deleted = new_obj['deleted']
+    if update_geo:
+        geodata = get_lat_lng(new_obj['city'],new_obj['street'])
+        old_obj.lat = geodata['lat']
+        old_obj.lat = geodata['lng']
+    old_obj.save()
+
+def create_eort(obj):
+    geodata = get_lat_lng(obj['city'],obj['street'])
+    new = Eort(fm_eort_id = obj['fm_eort_id'], name = obj['name'], street = obj['street'], region = obj['region'], zip_code = obj['zip_code'], city = obj['city'], deleted = obj['deleted'], lat = geodata['lat'], lng = geodata['lng'])
+    new.save()
+
+@shared_task
+def import_eort(fileid):
+    log.info("Workshop Importer started.Upload-PK: {}".format(fileid))
+    csvf = Upload.objects.get(pk=fileid)
+    with open(csvf.record.path, 'r', encoding='utf-8') as f:
+        next(f,None) #Skip Header
+        count_created = 0
+        count_updated = 0
+        count_error = 0
+        reader = csv.DictReader(csvf,fieldnames=('fm_eort_id', 'name', 'street', 'zip_code'),delimiter=';')
+        Eort.objects.all().update(deleted=True)
+        for counter,row in enumerate(reader):
+            content = dict(row)
+            try:
+                c = get_zip_obj(content['zip_code'])
+                obj = get_eort_by_fm_eort_id(content['fm_eort_id'])
+                if obj is not None:
+                    update_eort(obj, {"name":content['name'], "street":norm_street(content['street']), "zip_code": content['zip_code'], "city": c, "region": content['zip_code'][0:2], "deleted": False})
+                    count_updated += 1
+                    operation = "UPDATE"
+                else:
+                    create_eort({"fm_eort_id": content['fm_eort_id'], "name":content['name'], "street":norm_street(content['street']), "zip_code": content['zip_code'], "city": c, "region": content['zip_code'][0:2], "deleted": False})
+                    count_created += 1
+                    operation = "CREATE"
+            except Exception as e:
+                count_error += 1
+                log.debug("An Error occured")
+                log.debug(e)
+                log.debug("Operation {} failed".format(operation))
+                log.debug({"fm_eort_id": content['fm_eort_id'], "name":content['name'], "street":norm_street(content['street']), "zip_code": content['zip_code'], "city": c, "region": content['zip_code'][0:2], "deleted": False})
+                pass
+            print("DONE: {}".format(counter),end="\r")
+    Eort.objects.filter(deleted=True).delete()
+    log.info("{} Eorte created, {} Eorte updated, {} failed to update/create".format(count_created, count_updated, count_error))
+    csvf.finished = True
+    csvf.save()
+    log.info("Task completed")
     print("")
     print("Fertig")
     return
