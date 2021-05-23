@@ -103,7 +103,7 @@ def import_zip_codes(fileid):
                 log.debug(content)
                 log.debug(e)
                 pass
-            print("DONE: {}".format(counter),end="")
+            print("DONE: {}".format(counter),end="\r")
     csvf.finished = True
     csvf.save()
     log.debug("Task completed")
@@ -141,7 +141,7 @@ def import_workshops(fileid):
                 log.debug(content)
                 log.error(e)
                 pass
-            print("DONE: {}".format(counter),end="")
+            print("DONE: {}".format(counter),end="\r")
     Workshop.objects.filter(deleted=True).delete()
     log.info("{} Workshops created, {} Vehicles updated, {} failed to update/create".format(count_created, count_updated, count_error))
     csvf.finished = True
