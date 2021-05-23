@@ -10,6 +10,7 @@ from django.conf import settings
 import csv
 import logging
 import googlemaps
+import datetime
 gmaps = googlemaps.Client(key=settings.WZO_OPTIONS['GOOGLE_TOKEN'])
 log = logging.getLogger(__name__)
 
@@ -237,5 +238,93 @@ def import_eort(fileid):
     csvf.save()
     log.info("Task completed")
     print("")
+    print("Fertig")
+    return
+
+@shared_task
+def import_veh(fileid):
+    log.info("Veh Importer started.Upload-PK: {}".format(fileid))
+    csvf = Upload.objects.get(pk=fileid)
+    with open(csvf.record.path, 'r', encoding='utf-8') as f:
+        next(f,None) #Skip Header
+        count_created = 0
+        count_updated = 0
+        count_error = 0
+        reader = csv.DictReader(f,fieldnames=('fm_eort_id', 'ikz', 'objno', 'objgroup', 'make', 'model', 'reg_date', 'year','service_contract'),delimiter=';')
+        Vehicle.objects.all().update(deleted=True)
+        for counter,row in enumerate(reader):
+            content = dict(row)          
+            try:
+                eort = Eort.objects.get(fm_eort_id=content['fm_eort_id'])
+                age = datetime.datetime.now() - datetime.datetime.strptime(content['reg_date'],'%Y-%m-%d')
+                obj, created = Vehicle.objects.update_or_create(ikz=content['ikz'], defaults={"eort": eort, "objno": content['objno'], "objgroup": content['objgroup'],"make": content['make'], "model": content['model'], "reg_date": content['reg_date'], "year": content['year'],"service_contract": content['service_contract'], "age": age.days, "deleted": False})
+                obj.save()
+                if created:
+                    count_created += 1
+                else:
+                    count_updated += 1
+            except Exception as e:
+                log.debug("An Error occured")
+                log.debug(content)
+                log.error(e)
+                count_error += 1
+                pass
+            print("DONE: {}".format(counter),end="\r")
+    Vehicle.objects.filter(deleted=True).delete()
+    log.info("{} Vehicles created, {} Vehicles updated, {} failed to update/create".format(count_created, count_updated, count_error))
+    csvf.finished = True
+    csvf.save()
+    log.info("Task completed")
+    print("")
+    print("Fertig")
+    return
+
+def to_float(obj):
+    try:
+        return float(obj)
+    except:
+        return None
+
+def check_empty_string(obj):
+    if obj == '':
+        return None
+    else:
+        return str(obj)
+
+@shared_task
+def import_rules(fileid):
+    log.info("Veh Importer started.Upload-PK: {}".format(fileid))
+    csvf = Upload.objects.get(pk=fileid)
+    with open(csvf.record.path, 'r', encoding='utf-8') as f:
+        reader = csv.DictReader(f,fieldnames=('lat', 'lng', 'radius', 'zip_code', 'make', 'model', 'objno', 'year', 'age', 'service_contract', 'ikz', 'kuerzel', 'address', 'note'),delimiter=';')
+        RuleWT.objects.all().delete()
+        for counter,row in enumerate(reader):
+            rd = dict(row)
+            try:
+                new = RuleWT()
+                new.lat = to_float(rd['lat'])
+                new.lng = to_float(rd['lng'])
+                new.radius = to_float(rd['radius'])
+                new.zip_code = check_empty_string(rd['zip_code'])
+                new.make = check_empty_string(rd['make'])
+                new.objno = check_empty_string(rd['objno'])
+                new.year = check_empty_string(rd['year'])
+                new.age = check_empty_string(rd['age'])
+                new.service_contract = check_empty_string(rd['service_contract'])
+                new.ikz = check_empty_string(rd['ikz'])
+                new.kuerzel = check_empty_string(rd['kuerzel'])
+                new.address = check_empty_string(rd['address'])
+                new.note = check_empty_string(rd['note'])
+                new.save()
+            except Exception as e:
+                log.debug("An Error occured")
+                log.debug(rd)
+                log.error(e)
+                pass
+            print("DONE: {}".format(counter),end="\r")
+    print("")
+    print("Update Row Index started")
+    new.update_row_numbers()
+    log.info("Task completed")
     print("Fertig")
     return
