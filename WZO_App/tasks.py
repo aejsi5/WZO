@@ -201,14 +201,14 @@ def create_eort(obj):
 
 @shared_task
 def import_eort(fileid):
-    log.info("Workshop Importer started.Upload-PK: {}".format(fileid))
+    log.info("Eort Importer started.Upload-PK: {}".format(fileid))
     csvf = Upload.objects.get(pk=fileid)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
         next(f,None) #Skip Header
         count_created = 0
         count_updated = 0
         count_error = 0
-        reader = csv.DictReader(csvf,fieldnames=('fm_eort_id', 'name', 'street', 'zip_code'),delimiter=';')
+        reader = csv.DictReader(f,fieldnames=('fm_eort_id', 'name', 'street', 'zip_code'),delimiter=';')
         Eort.objects.all().update(deleted=True)
         for counter,row in enumerate(reader):
             content = dict(row)
