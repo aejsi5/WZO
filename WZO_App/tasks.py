@@ -293,9 +293,10 @@ def check_empty_string(obj):
 
 @shared_task
 def import_rules(fileid):
-    log.info("Veh Importer started.Upload-PK: {}".format(fileid))
+    log.info("Rule Importer started.Upload-PK: {}".format(fileid))
     csvf = Upload.objects.get(pk=fileid)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
+        next(f,None) #Skip Header
         reader = csv.DictReader(f,fieldnames=('lat', 'lng', 'radius', 'zip_code', 'make', 'model', 'objno', 'year', 'age', 'service_contract', 'ikz', 'kuerzel', 'address', 'note'),delimiter=';')
         RuleWT.objects.all().delete()
         for counter,row in enumerate(reader):
@@ -307,6 +308,7 @@ def import_rules(fileid):
                 new.radius = to_float(rd['radius'])
                 new.zip_code = check_empty_string(rd['zip_code'])
                 new.make = check_empty_string(rd['make'])
+                new.model = check_empty_string(rd['model'])
                 new.objno = check_empty_string(rd['objno'])
                 new.year = check_empty_string(rd['year'])
                 new.age = check_empty_string(rd['age'])
