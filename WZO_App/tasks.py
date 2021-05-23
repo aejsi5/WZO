@@ -86,28 +86,66 @@ def send_delete_mail(user_first, user_mail):
 
 @shared_task
 def import_zip_codes(fileid):
-    log.debug(fileid)
+    log.info("ZipImporter started. Upload-PK: {}".format(fileid))
     csvf = Upload.objects.get(pk=fileid)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
-        #csvf = io.StringIO(csvfile.read().decode('utf-8'))
         content = []
-        line = 0
+        next(f,None) #Skip Header
         reader = csv.DictReader(f,fieldnames=('osm_id', 'ort', 'plz', 'bundesland'),delimiter=';')
-        for row in reader:
-            if not line == 0:
-                content.append(dict(row))
-            line += 1
-        if len(content) > 0 :
-            Zip_Code.objects.all().delete()
-            for i in content:
-                try:
-                    new = Zip_Code.objects.create(zip_code= i['plz'], city=i['ort'], state=i['bundesland'])
-                    new.save()
-                except Exception as e:
-                    print("Zip_Code Importer")
-                    print(i)
-                    print(e)
+        Zip_Code.objects.all().delete()
+        for counter, row in enumerate(reader):
+            content = dict(row) 
+            try:
+                new = Zip_Code.objects.create(zip_code= content['plz'], city=content['ort'], state=content['bundesland'])
+                new.save()
+            except Exception as e:
+                log.debug("Error occured")
+                log.debug(content)
+                log.debug(e)
+                pass
+            print("DONE: {}".format(counter),end="")
     csvf.finished = True
     csvf.save()
+    log.debug("Task completed")
+    print("Fertig")
+    return
+
+def get_zip_obj(zip_code):
+    cobj = Zip_Code.objects.filter(zip_code=zip_code).first()
+    return cobj
+
+@shared_task
+def import_workshops(fileid):
+    log.info("Workshop Importer started")
+    csvf = Upload.objects.get(pk=fileid)
+    with open(csvf.record.path, 'r', encoding='utf-8') as f:
+        next(f,None) #Skip Header
+        content = []
+        count_created = 0
+        count_updated = 0
+        count_error = 0
+        reader = csv.DictReader(f,fieldnames=('kuerzel', 'name', 'street', 'zip_code', 'phone', 'central_email', 'contact_email', 'wp_user'),delimiter=';')
+        Workshop.objects.all().update(deleted=True)
+        for counter,row in enumerate(reader):
+            content = dict(row) 
+            c = get_zip_obj(content['zip_code'])
+            try:
+                new, created = Workshop.objects.update_or_create(kuerzel= content['kuerzel'], defaults={'name':content['name'], 'street':content['street'], 'zip_code':content['zip_code'], 'phone':content['phone'], 'central_email':content['central_email'], 'contact_email':content['contact_email'], 'wp_user':content['wp_user'], 'city':c})
+                new.save()
+                if created:
+                    count_created += 1
+                else:
+                    count_updated += 1
+            except Exception as e:
+                log.debug("Error occured")
+                log.debug(content)
+                log.error(e)
+                pass
+            print("DONE: {}".format(counter),end="")
+    Workshop.objects.filter(deleted=True).delete()
+    log.info("{} Workshops created, {} Vehicles updated, {} failed to update/create".format(count_created, count_updated, count_error))
+    csvf.finished = True
+    csvf.save()
+    log.debug("Task completed")
     print("Fertig")
     return
