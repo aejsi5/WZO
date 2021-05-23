@@ -106,3 +106,5 @@ def import_zip_codes(fileid):
                     log.info("Zip_Code Importer")
                     log.info(i)
                     log.error(e)
+    csvf.finished = True
+    csvf.save()

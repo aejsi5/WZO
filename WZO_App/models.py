@@ -154,6 +154,7 @@ class Upload(models.Model):
     pattern = models.CharField('Datei-Typ',max_length=255, null=False, blank=False)
     inserted = models.DateTimeField('Angelegt',auto_now_add=True, null=False, blank=False)
     record = models.FileField(storage=fs)
+    finished = models.BooleanField('Fertig', default=False)
 
     def __str__(self):
         return str(self.upload_id)
