@@ -8,8 +8,9 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.mail import EmailMessage
 from django.conf import settings
 import csv
-from celery.utils.log import get_task_logger
-log = get_task_logger(__name__)
+import logging
+log = logging.getLogger(__name__)
+
 
 @shared_task
 def send_verification_mail(domain, userpk):
