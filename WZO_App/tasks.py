@@ -85,9 +85,8 @@ def send_delete_mail(user_first, user_mail):
 
 @shared_task
 def import_zip_codes(fileid):
-    print(fileid)
+    log.debug(fileid)
     csvf = Upload.objects.get(pk=fileid)
-    print(csvf.record.path)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
         #csvf = io.StringIO(csvfile.read().decode('utf-8'))
         content = []
@@ -109,5 +108,5 @@ def import_zip_codes(fileid):
                     print(e)
     csvf.finished = True
     csvf.save()
-    Zip_Code.objects.all().delete()
+    print("Fertig")
     return
