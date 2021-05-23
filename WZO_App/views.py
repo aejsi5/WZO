@@ -314,7 +314,6 @@ class Import(View):
                 ctx = {}
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
-            filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + "." + ext
             upload = Upload.objects.create(pattern="EortImport", record=csv_file)
             #self.import_eort(csv_file)
         elif 'import_veh' in request.FILES:
@@ -325,8 +324,8 @@ class Import(View):
                 ctx = {}
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
-            filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + "." + ext
-            self.import_veh(csv_file)
+            upload = Upload.objects.create(pattern="VehImport", record=csv_file)
+            #self.import_veh(csv_file)
         elif 'import_zips' in request.FILES:
             csv_file = request.FILES['import_zips']
             ext = request.FILES['import_zips'].name.split('.')[-1]
@@ -335,8 +334,9 @@ class Import(View):
                 ctx = {}
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
-            filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + "." + ext
-            self.import_zip_codes(csv_file)
+            upload = Upload.objects.create(pattern="ZipImport", record=csv_file)
+            import_zip_codes.delay(upload.pk)
+            #self.import_zip_codes(csv_file)
         elif 'import_ws' in request.FILES:
             csv_file = request.FILES['import_ws']
             ext = request.FILES['import_ws'].name.split('.')[-1]
@@ -345,8 +345,8 @@ class Import(View):
                 ctx = {}
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
-            filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + "." + ext
-            self.import_workshops(csv_file)
+            upload = Upload.objects.create(pattern="WorkshopImport", record=csv_file)
+            #self.import_workshops(csv_file)
         elif 'import_rules' in request.FILES:
             csv_file = request.FILES['import_rules']
             ext = request.FILES['import_rules'].name.split('.')[-1]
@@ -355,8 +355,8 @@ class Import(View):
                 ctx = {}
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
-            filename = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + "." + ext
-            self.import_rules(csv_file)
+            upload = Upload.objects.create(pattern="WTRulesImport", record=csv_file)
+            #self.import_rules(csv_file)
         return render(request, self.template_name)
 
     def import_eort(self, csvfile, *args, **kwargs):

@@ -7,6 +7,9 @@ from django.utils.encoding import force_bytes, force_text
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.mail import EmailMessage
 from django.conf import settings
+import csv
+import logging
+log = logging.getLogger(__name__)
 
 @shared_task
 def send_verification_mail(domain, userpk):
@@ -79,3 +82,27 @@ def send_delete_mail(user_first, user_mail):
         )
     email.send()
     return 
+
+@shared_task
+def import_zip_codes(fileid):
+    csvf = Upload.objects.get(pk=fileid)
+    log.debug(csvf.path)
+    with open(csvf.path, 'r', encoding='utf-8') as f:
+        #csvf = io.StringIO(csvfile.read().decode('utf-8'))
+        content = []
+        line = 0
+        reader = csv.DictReader(f,fieldnames=('osm_id', 'ort', 'plz', 'bundesland'),delimiter=';')
+        for row in reader:
+            if not line == 0:
+                content.append(dict(row))
+            line += 1
+        if len(content) > 0 :
+            Zip_Code.objects.all().delete()
+            for i in content:
+                try:
+                    new = Zip_Code.objects.create(zip_code= i['plz'], city=i['ort'], state=i['bundesland'])
+                    new.save()
+                except Exception as e:
+                    log.info("Zip_Code Importer")
+                    log.info(i)
+                    log.error(e)
