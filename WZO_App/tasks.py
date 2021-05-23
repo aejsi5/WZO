@@ -85,6 +85,8 @@ def send_delete_mail(user_first, user_mail):
 
 @shared_task
 def import_zip_codes(fileid):
+    print("Hallo")
+    log.debug('CeleryImport started')
     csvf = Upload.objects.get(pk=fileid)
     log.debug(csvf.path)
     with open(csvf.path, 'r', encoding='utf-8') as f:
@@ -108,3 +110,5 @@ def import_zip_codes(fileid):
                     log.error(e)
     csvf.finished = True
     csvf.save()
+    Zip_Code.objects.all().delete()
+    return
