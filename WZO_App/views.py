@@ -315,6 +315,7 @@ class Import(View):
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
             upload = Upload.objects.create(pattern="EortImport", record=csv_file)
+            import_eort.delay(upload.pk)
             #self.import_eort(csv_file)
         elif 'import_veh' in request.FILES:
             csv_file = request.FILES['import_veh']
