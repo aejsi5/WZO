@@ -381,13 +381,15 @@ class Import(View):
                 if obj is not None:
                     self.update_eort(obj, {"name":content['name'], "street":self.norm_street(content['street']), "zip_code": content['zip_code'], "city": c, "region": content['zip_code'][0:2], "deleted": False})
                     count_updated += 1
+                    operation = "UPDATE"
                 else:
                     self.create_eort({"fm_eort_id": content['fm_eort_id'], "name":content['name'], "street":self.norm_street(content['street']), "zip_code": content['zip_code'], "city": c, "region": content['zip_code'][0:2], "deleted": False})
                     count_created += 1
+                    operation = "CREATE"
             except Exception as e:
                 count_error += 1
-                log.info(content)
                 log.error(e)
+                log.debug("Operation {} failed".format(operation))
                 log.debug({"fm_eort_id": content['fm_eort_id'], "name":content['name'], "street:":self.norm_street(content['street']), "zip_code": content['zip_code'], "city": c, "region": content['zip_code'][0:2], "deleted": False})
         Eort.objects.filter(deleted=True).delete()
         log.info("{} Eorte created, {} Eorte updated, {} failed to update/create".format(count_created, count_updated, count_error))
