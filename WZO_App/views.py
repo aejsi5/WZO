@@ -326,6 +326,7 @@ class Import(View):
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
             upload = Upload.objects.create(pattern="VehImport", record=csv_file)
+            import_veh.delay(upload.pk)
             #self.import_veh(csv_file)
         elif 'import_zips' in request.FILES:
             csv_file = request.FILES['import_zips']
@@ -358,6 +359,7 @@ class Import(View):
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
             upload = Upload.objects.create(pattern="WTRulesImport", record=csv_file)
+            import_rules.delay(upload.pk)
             #self.import_rules(csv_file)
         return render(request, self.template_name)
 
