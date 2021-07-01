@@ -300,7 +300,7 @@ class Export(View):
         eorte = Eort.objects.filter(deleted=False)
         response = HttpResponse(
             content_type='text/csv',
-            headers={'Content-Disposition': 'attachment; filename="eort_export.csv"'},
+            header={'Content-Disposition': 'attachment; filename="eort_export.csv"'},
         )
         writer = csv.writer(response)
         writer.writerow(['EortID', 'FM-EortID', 'Lat', 'Lng', 'Name', 'Straße', 'Leitregion', 'PLZ', 'Ort'])
