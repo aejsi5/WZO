@@ -302,7 +302,7 @@ class Export(View):
     
     def export_eorte(self, *args, **kwargs):
         eorte = Eort.objects.filter(deleted=False)
-        response = HttpResponse(content_type="text/csv")
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
         response['Content-Disposition'] = 'attachment; filename="eorte_export.csv"'
         writer = csv.writer(response, delimiter=";")
         writer.writerow(['EortID', 'FM-EortID', 'Lat', 'Lng', 'Name', 'Straße', 'Leitregion', 'PLZ'])
@@ -312,7 +312,7 @@ class Export(View):
     
     def export_workshops(self, *args, **kwargs):
         wst = Workshop.objects.filter(deleted=False)
-        response = HttpResponse(content_type="text/csv")
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
         response['Content-Disposition'] = 'attachment; filename="werkstatt_export.csv"'
         writer = csv.writer(response, delimiter=";")
         writer.writerow(['WerkstattID', 'Kuerzel', 'Name', 'Straße', 'Plz', 'Telefon', 'Email-Zentrale', 'Email-Asp', 'WP-User'])
