@@ -299,15 +299,12 @@ class Export(View):
     
     def export_eorte(self, *args, **kwargs):
         eorte = Eort.objects.filter(deleted=False)
-        response = HttpResponse(
-            content_type='text/csv',
-            #headers={'Content-Disposition': 'attachment; filename="eort_export.csv"'},
-        )
-        writer = csv.writer(response)
-        writer.writerow(['EortID', 'FM-EortID', 'Lat', 'Lng', 'Name', 'Straße', 'Leitregion', 'PLZ'])
-        for i in eorte:
-            writer.writerow([i.eort_id, i.fm_eort_id, i.lat, i.lng, i.name, i.street, i.region, i.zip_code])
-        return response
+        with open("eorte_export.csv", 'w') as f:
+            writer = csv.writer(f, delimiter=";")
+            writer.writerow(['EortID', 'FM-EortID', 'Lat', 'Lng', 'Name', 'Straße', 'Leitregion', 'PLZ'])
+            for i in eorte:
+                writer.writerow([i.eort_id, i.fm_eort_id, i.lat, i.lng, i.name, i.street, i.region, i.zip_code])
+            return f
 
 class Import(View):
     template_name = "import.html"
