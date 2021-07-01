@@ -305,7 +305,7 @@ class Export(View):
         writer = csv.writer(response)
         writer.writerow(['EortID', 'FM-EortID', 'Lat', 'Lng', 'Name', 'Straße', 'Leitregion', 'PLZ', 'Ort'])
         for i in eorte:
-            writer.writerow([i['eort_id'], i['fm_eort_id'], i['lat'], i['lng'], i['name'], i['street'], i['region'], i['zip_code'], i['city']['city']])
+            writer.writerow([i.eort_id, i.fm_eort_id, i.lat, i.lng, i.name, i.street, i.region, i.zip_code, i.city.city])
         return response
 
 class Import(View):
