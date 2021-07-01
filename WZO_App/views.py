@@ -293,6 +293,9 @@ class Export(View):
             if request.GET.get('download') == 'eorte':
                 res = self.export_eorte()
                 return res
+            if request.GET.get('download') == 'werkstätten':
+                res = self.export_workshops()
+                return res
             return render(request, self.template_name)
         else:
             return HttpResponse(status=403)
@@ -305,6 +308,16 @@ class Export(View):
         writer.writerow(['EortID', 'FM-EortID', 'Lat', 'Lng', 'Name', 'Straße', 'Leitregion', 'PLZ'])
         for i in eorte:
             writer.writerow([i.eort_id, i.fm_eort_id, i.lat, i.lng, i.name.encode('utf-8'), i.street.encode('utf-8'), i.region, i.zip_code])
+        return response
+    
+    def export_workshops(self, *args, **kwargs):
+        wst = Workshop.objects.filter(deleted=False)
+        response = HttpResponse(content_type="text/csv")
+        response['Content-Disposition'] = 'attachment; filename="werkstatt_export.csv"'
+        writer = csv.writer(response, delimiter=";")
+        writer.writerow(['WerkstattID', 'Kuerzel', 'Name', 'Straße', 'Plz', 'Telefon', 'Email-Zentrale', 'Email-Asp', 'WP-User'])
+        for i in wst:
+            writer.writerow([i.w_id, i.kuerzel, i.name.encode('utf-8'), i.street.encode('utf-8'), i.zip_code, i.phone, i.central_email, i.contact_email, i.wp_user])
         return response
 
 class Import(View):
