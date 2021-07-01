@@ -291,12 +291,12 @@ class Export(View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             if request.GET.get('download') == 'eorte':
-                self.export_eorte(request)
+                self.export_eorte()
             return render(request, self.template_name)
         else:
             return HttpResponse(status=403)
     
-    def export_eorte(self, request, *args, **kwargs):
+    def export_eorte(self, *args, **kwargs):
         eorte = Eort.objects.filter(deleted=False)
         response = HttpResponse(
             content_type='text/csv',
