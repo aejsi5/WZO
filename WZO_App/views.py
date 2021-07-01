@@ -290,9 +290,23 @@ class Export(View):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
+            if request.GET.get('download') == 'eorte':
+                self.export_eorte()
             return render(request, self.template_name)
         else:
             return HttpResponse(status=403)
+    
+    def export_eorte(self, request, *args, **kwargs):
+        eorte = Eort.objects.filter(deleted=False)
+        response = HttpResponse(
+            content_type='text/csv',
+            headers={'Content-Disposition': 'attachment; filename="eort_export.csv"'},
+        )
+        writer = csv.writer(response)
+        writer.writerow(['EortID', 'FM-EortID', 'Lat', 'Lng', 'Name', 'Straße', 'Leitregion', 'PLZ', 'Ort'])
+        for i in eorte:
+            writer.writerow([eorte['eort_id'], eorte['fm_eort_id'], eorte['lat'], eorte['lng'], eorte['name'], eorte['street'], eorte['region'], eorte['zip_code'], eorte['city']['city']])
+        return response
 
 class Import(View):
     template_name = "import.html"
