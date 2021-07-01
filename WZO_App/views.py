@@ -317,7 +317,7 @@ class Export(View):
         writer = csv.writer(response, delimiter=";")
         writer.writerow(['WerkstattID', 'Kuerzel', 'Name', 'Straße', 'Plz', 'Telefon', 'Email-Zentrale', 'Email-Asp', 'WP-User'])
         for i in wst:
-            writer.writerow([i.w_id, i.kuerzel, i.name.encode('utf-8'), i.street.encode('utf-8'), i.zip_code, i.phone, i.central_email, i.contact_email, i.wp_user])
+            writer.writerow([i.w_id, i.kuerzel, i.name, i.street, i.zip_code, i.phone, i.central_email, i.contact_email, i.wp_user])
         return response
 
 class Import(View):
