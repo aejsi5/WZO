@@ -291,7 +291,7 @@ class Export(View):
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             if request.GET.get('download') == 'eorte':
-                self.export_eorte()
+                self.export_eorte(request)
             return render(request, self.template_name)
         else:
             return HttpResponse(status=403)
