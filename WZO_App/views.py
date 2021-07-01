@@ -307,7 +307,7 @@ class Export(View):
         writer = csv.writer(response, delimiter=";")
         writer.writerow(['EortID', 'FM-EortID', 'Lat', 'Lng', 'Name', 'Straße', 'Leitregion', 'PLZ'])
         for i in eorte:
-            writer.writerow([i.eort_id, i.fm_eort_id, i.lat, i.lng, i.name.encode('utf-8'), i.street.encode('utf-8'), i.region, i.zip_code])
+            writer.writerow([i.eort_id, i.fm_eort_id, i.lat, i.lng, i.name, i.street, i.region, i.zip_code])
         return response
     
     def export_workshops(self, *args, **kwargs):
