@@ -209,7 +209,8 @@ def import_eort(self, fileid):
     csvf = Upload.objects.get(pk=fileid)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
         total = sum(1 for line in f)
-        #f.seek(0)
+        log.info("Total Rows to import: {}".format(total))
+        f.seek(0)
         next(f,None) #Skip Header
         count_created = 0
         count_updated = 0
