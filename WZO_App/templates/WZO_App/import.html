@@ -1,14 +1,15 @@
 {% extends 'WZO_App/base.html' %}
 {% block maincontent %}
-{% for i in tasks%}
-    <span>{{i}}</span>
-{% endfor %}
     <section id="import_section">
         <div class="container import_container">
             <div class="row">
                 {% if perms.WZO_App.add_zip_code %}
                 <div class="col">
-                    <div class="import-blocker"><span class="warning-stamp">Läuft bereits...</span></div>
+                    {% for i in tasks%}
+                        {% if i.task_name == 'WZO_App.tasks.import_zip_codes' %}
+                            <div class="import-blocker"><span class="warning-stamp">Läuft bereits...</span></div>
+                        {% endif %}
+                    {% endfor %}
                     <form class='import_form' method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="row">
@@ -38,7 +39,11 @@
                 {% endif %}
                 {% if perms.WZO_App.add_eort %}
                 <div class="col">
-                    <div class="import-blocker"><span class="warning-stamp">Läuft bereits...</span></div>
+                    {% for i in tasks%}
+                        {% if i.task_name == 'WZO_App.tasks.import_eort' %}
+                            <div class="import-blocker"><span class="warning-stamp">Läuft bereits...</span></div>
+                        {% endif %}
+                    {% endfor %}
                     <form class='import_form' method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="row">
@@ -70,7 +75,11 @@
             <div class="row">
                 {% if perms.WZO_App.add_vehicle %}
                 <div class="col">
-                    <div class="import-blocker"><span class="warning-stamp">Läuft bereits...</span></div>
+                    {% for i in tasks%}
+                        {% if i.task_name == 'WZO_App.tasks.import_veh' %}
+                            <div class="import-blocker"><span class="warning-stamp">Läuft bereits...</span></div>
+                        {% endif %}
+                    {% endfor %}
                     <form class='import_form' method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="row">
@@ -100,7 +109,11 @@
                 {% endif %}
                 {% if perms.WZO_App.add_workshop %}
                 <div class="col">
-                    <div class="import-blocker"><span class="warning-stamp">Läuft bereits...</span></div>
+                    {% for i in tasks%}
+                        {% if i.task_name == 'WZO_App.tasks.import_workshops' %}
+                            <div class="import-blocker"><span class="warning-stamp">Läuft bereits...</span></div>
+                        {% endif %}
+                    {% endfor %}
                     <form class='import_form' method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="row">
@@ -132,7 +145,11 @@
             <div class="row">
                 {% if perms.WZO_App.add_allocation %}
                 <div class="col">
-                    <div class="import-blocker"><span class="warning-stamp">Läuft bereits...</span></div>
+                    {% for i in tasks%}
+                        {% if i.task_name == 'WZO_App.tasks.import_rules' %}
+                            <div class="import-blocker"><span class="warning-stamp">Läuft bereits...</span></div>
+                        {% endif %}
+                    {% endfor %}
                     <form class='import_form' method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="row">
