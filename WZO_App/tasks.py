@@ -201,7 +201,7 @@ def create_eort(obj):
     new = Eort(fm_eort_id = obj['fm_eort_id'], name = obj['name'], street = obj['street'], region = obj['region'], zip_code = obj['zip_code'], city = obj['city'], deleted = obj['deleted'], lat = geodata['lat'], lng = geodata['lng'])
     new.save()
 
-@shared_task
+@shared_task(bind=True)
 def import_eort(self, fileid):
     log.info("Eort Importer started.Upload-PK: {}".format(fileid))
     progress_recorder = ProgressRecorder(self)
