@@ -24,6 +24,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import *
+from WZO.celery import app
 
 from .models import *
 from .serializer import *
@@ -331,8 +332,10 @@ class Import(View):
             if not running_tasks:
                 return render(request, self.template_name)
             else:
-                log.info({'tasks': running_tasks})
-                return render(request, self.template_name, {'tasks': running_tasks})
+                inspector = app.control.inspect()
+                return HttpResponse(inspector.active())
+                #log.info({'tasks': running_tasks})
+                #return render(request, self.template_name, {'tasks': running_tasks})
         else:
             return HttpResponse(status=403)
 
