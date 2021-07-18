@@ -1,5 +1,8 @@
 {% extends 'WZO_App/base.html' %}
 {% block maincontent %}
+{% for i in tasks%}
+<span>{{i}}</span>
+{% endfor %}
     <section id="import_section">
         <div class="container import_container">
             <div class="row">
