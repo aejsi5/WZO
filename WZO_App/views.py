@@ -333,9 +333,9 @@ class Import(View):
                 return render(request, self.template_name)
             else:
                 inspector = app.control.inspect()
-                return HttpResponse(inspector.active())
-                #log.info({'tasks': running_tasks})
-                #return render(request, self.template_name, {'tasks': running_tasks})
+                log.debug(inspector.active())
+                log.info({'tasks': running_tasks})
+                return render(request, self.template_name, {'tasks': running_tasks})
         else:
             return HttpResponse(status=403)
 
