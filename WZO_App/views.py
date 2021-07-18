@@ -389,7 +389,7 @@ class Import(View):
                 return render(request, self.template_name, ctx)
             upload = Upload.objects.create(pattern="WTRulesImport", record=csv_file)
             task = import_rules.delay(upload.pk)
-        self.get(request)
+        return self.get(request)
 
 class HealthCheck(View):
     template_name = "healthcheck.html"
