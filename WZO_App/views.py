@@ -327,13 +327,13 @@ class Import(View):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            running_tasks = TaskResult.objects.filter(task_name__in=['WZO_App.tasks.import_zip_codes', 'WZO_App.tasks.import_eort', 'WZO_App.tasks.import_workshops', 'WZO_App.tasks.import_veh', 'WZO_App.tasks.import_rules']).exclude(status__in=[states.PENDING, states.STARTED, states.RECEIVED, states.RETRY]).values('task_id', 'task_name', 'status')
-            return HttpResponse(running_tasks)
-            #return render(request, self.template_name)
+            running_tasks = TaskResult.objects.filter(task_name__in=['WZO_App.tasks.import_zip_codes', 'WZO_App.tasks.import_eort', 'WZO_App.tasks.import_workshops', 'WZO_App.tasks.import_veh', 'WZO_App.tasks.import_rules'], status__in=[states.PENDING, states.STARTED, states.RECEIVED, states.RETRY]).values('task_id', 'task_name', 'status')
+            if not running_tasks:
+                return render(request, self.template_name)
+            else:
+                return render(request, self.template_name, {'tasks': running_tasks})
         else:
-            running_tasks = TaskResult.objects.filter(task_name__in=['WZO_App.tasks.import_zip_codes', 'WZO_App.tasks.import_eort', 'WZO_App.tasks.import_workshops', 'WZO_App.tasks.import_veh', 'WZO_App.tasks.import_rules']).values('task_id', 'task_name', 'status')
-            return HttpResponse(running_tasks)
-            #return HttpResponse(status=403)
+            return HttpResponse(status=403)
 
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
