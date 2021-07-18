@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, re_path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from WZO_App import views
@@ -41,5 +41,6 @@ urlpatterns = [
     path('api/v1/eort/<pk>/vehicles/', views.EortVehicleList_Api.as_view()),
     path('api/v1/vehicle/<pk>', views.Vehicle_Api.as_view()),
     path('api/v1/vehicle/<pk>/workshops/', views.VehicleWorkshopList_Api.as_view()),
-    path('api/v1/rules/wear-and-tear/', views.WTRulesList_Api.as_view())
+    path('api/v1/rules/wear-and-tear/', views.WTRulesList_Api.as_view()),
+    re_path(r'^celery-progress/', include('celery_progress.urls'))
 ]

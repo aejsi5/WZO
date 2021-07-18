@@ -1,4 +1,5 @@
 from celery import shared_task
+from celery_progress.backend import ProgressRecorder
 from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
 from .tokens import account_activation_token, account_reset_token
@@ -201,10 +202,14 @@ def create_eort(obj):
     new.save()
 
 @shared_task
-def import_eort(fileid):
+def import_eort(self, fileid):
     log.info("Eort Importer started.Upload-PK: {}".format(fileid))
+    progress_recorder = ProgressRecorder(self)
+    current = 0
     csvf = Upload.objects.get(pk=fileid)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
+        total = sum(1 for line in f)
+        #f.seek(0)
         next(f,None) #Skip Header
         count_created = 0
         count_updated = 0
@@ -231,7 +236,8 @@ def import_eort(fileid):
                 log.debug("Operation {} failed".format(operation))
                 log.debug({"fm_eort_id": content['fm_eort_id'], "name":content['name'], "street":norm_street(content['street']), "zip_code": content['zip_code'], "city": c, "region": content['zip_code'][0:2], "deleted": False})
                 pass
-            print("DONE: {}".format(counter),end="\r")
+            current = counter + 1
+            progress_recorder.set_progress(current, total)
     Eort.objects.filter(deleted=True).delete()
     log.info("{} Eorte created, {} Eorte updated, {} failed to update/create".format(count_created, count_updated, count_error))
     csvf.finished = True
@@ -330,3 +336,7 @@ def import_rules(fileid):
     log.info("Task completed")
     print("Fertig")
     return
+
+@shared_task
+def run_rules():
+    log.info("Rule Engine startet")
