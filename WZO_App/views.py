@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+from celery import states
+from django_celery_results.models import TaskResult
 from django.views import View
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
@@ -325,9 +327,13 @@ class Import(View):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            return render(request, self.template_name)
+            running_tasks = TaskResult.objects.filter(task_name__in=['WZO_App.tasks.import_zip_codes', 'WZO_App.tasks.import_eort', 'WZO_App.tasks.import_workshops', 'WZO_App.tasks.import_veh', 'WZO_App.tasks.import_rules']).exclude(status__in=[states.PENDING, states.STARTED, states.RECEIVED, states.RETRY]).values('task_id', 'task_name', 'status')
+            return print(running_tasks)
+            #return render(request, self.template_name)
         else:
-            return HttpResponse(status=403)
+            running_tasks = TaskResult.objects.filter(task_name__in=['WZO_App.tasks.import_zip_codes', 'WZO_App.tasks.import_eort', 'WZO_App.tasks.import_workshops', 'WZO_App.tasks.import_veh', 'WZO_App.tasks.import_rules']).values('task_id', 'task_name', 'status')
+            return print(running_tasks)
+            #return HttpResponse(status=403)
 
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated:
@@ -341,8 +347,7 @@ class Import(View):
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
             upload = Upload.objects.create(pattern="EortImport", record=csv_file)
-            import_eort.delay(upload.pk)
-            #self.import_eort(csv_file)
+            task = import_eort.delay(upload.pk)
         elif 'import_veh' in request.FILES:
             csv_file = request.FILES['import_veh']
             ext = request.FILES['import_veh'].name.split('.')[-1]
@@ -352,8 +357,7 @@ class Import(View):
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
             upload = Upload.objects.create(pattern="VehImport", record=csv_file)
-            import_veh.delay(upload.pk)
-            #self.import_veh(csv_file)
+            task = import_veh.delay(upload.pk)
         elif 'import_zips' in request.FILES:
             csv_file = request.FILES['import_zips']
             ext = request.FILES['import_zips'].name.split('.')[-1]
@@ -363,8 +367,7 @@ class Import(View):
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
             upload = Upload.objects.create(pattern="ZipImport", record=csv_file)
-            import_zip_codes.delay(upload.pk)
-            #self.import_zip_codes(csv_file)
+            task = import_zip_codes.delay(upload.pk)
         elif 'import_ws' in request.FILES:
             csv_file = request.FILES['import_ws']
             ext = request.FILES['import_ws'].name.split('.')[-1]
@@ -374,8 +377,7 @@ class Import(View):
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
             upload = Upload.objects.create(pattern="WorkshopImport", record=csv_file)
-            import_workshops.delay(upload.pk)
-            #self.import_workshops(csv_file)
+            task = import_workshops.delay(upload.pk)
         elif 'import_rules' in request.FILES:
             csv_file = request.FILES['import_rules']
             ext = request.FILES['import_rules'].name.split('.')[-1]
@@ -385,228 +387,8 @@ class Import(View):
                 ctx['error'] = 'File-Type not allowed'
                 return render(request, self.template_name, ctx)
             upload = Upload.objects.create(pattern="WTRulesImport", record=csv_file)
-            import_rules.delay(upload.pk)
-            #self.import_rules(csv_file)
+            task = import_rules.delay(upload.pk)
         return render(request, self.template_name)
-
-    def import_eort(self, csvfile, *args, **kwargs):
-        log.info("Eort Importer started")
-        csvf = io.StringIO(csvfile.read().decode('utf-8'))
-        content = []
-        header = True
-        count_created = 0
-        count_updated = 0
-        count_error = 0
-        reader = csv.DictReader(csvf,fieldnames=('fm_eort_id', 'name', 'street', 'zip_code'),delimiter=';')
-        Eort.objects.all().update(deleted=True)
-        for row in reader:
-            if header:
-                #Skip header
-                header = False
-                continue
-            content = dict(row)
-            try:
-                c = self.get_zip_obj(content['zip_code'])
-                obj = self.get_eort_by_fm_eort_id(content['fm_eort_id'])
-                if obj is not None:
-                    self.update_eort(obj, {"name":content['name'], "street":self.norm_street(content['street']), "zip_code": content['zip_code'], "city": c, "region": content['zip_code'][0:2], "deleted": False})
-                    count_updated += 1
-                    operation = "UPDATE"
-                else:
-                    self.create_eort({"fm_eort_id": content['fm_eort_id'], "name":content['name'], "street":self.norm_street(content['street']), "zip_code": content['zip_code'], "city": c, "region": content['zip_code'][0:2], "deleted": False})
-                    count_created += 1
-                    operation = "CREATE"
-            except Exception as e:
-                count_error += 1
-                log.exception("An Error occured")
-                log.error(e)
-                log.debug("Operation {} failed".format(operation))
-                log.debug({"fm_eort_id": content['fm_eort_id'], "name":content['name'], "street":self.norm_street(content['street']), "zip_code": content['zip_code'], "city": c, "region": content['zip_code'][0:2], "deleted": False})
-                pass
-        Eort.objects.filter(deleted=True).delete()
-        log.info("{} Eorte created, {} Eorte updated, {} failed to update/create".format(count_created, count_updated, count_error))
-
-    def get_eort_by_fm_eort_id(self, fm_eort_id):
-        try:
-            obj = Eort.objects.get(fm_eort_id=fm_eort_id)
-            return obj
-        except:
-            return None
-
-    def create_eort(self, obj):
-        geodata = self.get_lat_lng(obj['city'],obj['street'])
-        new = Eort(fm_eort_id = obj['fm_eort_id'], name = obj['name'], street = obj['street'], region = obj['region'], zip_code = obj['zip_code'], city = obj['city'], deleted = obj['deleted'], lat = geodata['lat'], lng = geodata['lng'])
-        new.save()
-    
-    def update_eort(self, old_obj, new_obj):
-        update_geo = False
-        if old_obj.street != new_obj['street'] or old_obj.zip_code != new_obj['zip_code']:
-            update_geo = True
-        old_obj.name = new_obj['name']
-        old_obj.street = new_obj['street']
-        old_obj.region = new_obj['region']
-        old_obj.zip_code = new_obj['zip_code']
-        old_obj.city = new_obj['city']
-        old_obj.deleted = new_obj['deleted']
-        if update_geo:
-            geodata = self.get_lat_lng(new_obj['city'],new_obj['street'])
-            old_obj.lat = geodata['lat']
-            old_obj.lat = geodata['lng']
-        old_obj.save()
-
-    def get_zip_obj(self, zip_code):
-        cobj = Zip_Code.objects.filter(zip_code=zip_code).first()
-        return cobj
-
-    def get_lat_lng(self, cityobj, street):
-        if cityobj is not None:
-            address = street + " " + cityobj.zip_code + " " + cityobj.state
-        else:
-            return {'lat': None, 'lng': None}
-        geocode_result = gmaps.geocode(address)
-        if geocode_result:
-            return geocode_result[0]['geometry']['location']
-        else:
-            return {'lat': None, 'lng': None}
-
-    def norm_street(self, street: str) -> str:
-        street = street.lower()
-        street = street.replace('ä', 'ae').replace('ö','oe').replace('ü', 'ue').replace('ß', 'ss')
-        street = street.replace('str.', 'strasse')
-        street = street.replace('  ', '')
-        return street
-
-    def import_zip_codes(self, csvfile, *args, **kwargs):
-        csvf = io.StringIO(csvfile.read().decode('utf-8'))
-        content = []
-        line = 0
-        reader = csv.DictReader(csvf,fieldnames=('osm_id', 'ort', 'plz', 'bundesland'),delimiter=';')
-        for row in reader:
-            if not line == 0:
-                content.append(dict(row))
-            line += 1
-        if len(content) > 0 :
-            Zip_Code.objects.all().delete()
-            for i in content:
-                try:
-                    new = Zip_Code.objects.create(zip_code= i['plz'], city=i['ort'], state=i['bundesland'])
-                    new.save()
-                except Exception as e:
-                    log.info("Zip_Code Importer")
-                    log.info(i)
-                    log.error(e)
-
-    def import_veh(self, csvfile, *args, **kwargs):
-        log.info("Vehicle Importer started")
-        csvf = io.StringIO(csvfile.read().decode('utf-8'))
-        content = []
-        header = True
-        count_created = 0
-        count_updated = 0
-        count_error = 0
-        reader = csv.DictReader(csvf,fieldnames=('fm_eort_id', 'ikz', 'objno', 'objgroup', 'make', 'model', 'reg_date', 'year','service_contract'),delimiter=';')
-        Vehicle.objects.all().update(deleted=True)
-        for row in reader:
-            if header:
-                #Skip header
-                header = False
-                continue
-            content = dict(row)          
-            try:
-                eort = Eort.objects.get(fm_eort_id=content['fm_eort_id'])
-                age = datetime.datetime.now() - datetime.datetime.strptime(content['reg_date'],'%Y-%m-%d')
-                obj, created = Vehicle.objects.update_or_create(ikz=content['ikz'], defaults={"eort": eort, "objno": content['objno'], "objgroup": content['objgroup'],"make": content['make'], "model": content['model'], "reg_date": content['reg_date'], "year": content['year'],"service_contract": content['service_contract'], "age": age.days, "deleted": False})
-                obj.save()
-                if created:
-                    count_created += 1
-                else:
-                    count_updated += 1
-            except Exception as e:
-                log.info("Veh Importer")
-                log.info(content)
-                log.error(e)
-                count_error += 1
-        Vehicle.objects.filter(deleted=True).delete()
-        log.info("{} Vehicles created, {} Vehicles updated, {} failed to update/create".format(count_created, count_updated, count_error))
-
-    def import_workshops(self, csvfile, *args, **kwargs):
-        log.info("Workshop Importer started")
-        csvf = io.StringIO(csvfile.read().decode('utf-8'))
-        content = []
-        header = True
-        count_created = 0
-        count_updated = 0
-        count_error = 0
-        reader = csv.DictReader(csvf,fieldnames=('kuerzel', 'name', 'street', 'zip_code', 'phone', 'central_email', 'contact_email', 'wp_user'),delimiter=';')
-        Workshop.objects.all().update(deleted=True)
-        for row in reader:
-            if header:
-                #Skip header
-                header = False
-                continue
-            content = dict(row) 
-            c = self.get_zip_obj(content['zip_code'])
-            try:
-                new, created = Workshop.objects.update_or_create(kuerzel= content['kuerzel'], defaults={'name':content['name'], 'street':content['street'], 'zip_code':content['zip_code'], 'phone':content['phone'], 'central_email':content['central_email'], 'contact_email':content['contact_email'], 'wp_user':content['wp_user'], 'city':c})
-                new.save()
-                if created:
-                    count_created += 1
-                else:
-                    count_updated += 1
-            except Exception as e:
-                log.info("Workshop Importer")
-                log.info(content)
-                log.error(e)
-        Workshop.objects.filter(deleted=True).delete()
-        log.info("{} Workshops created, {} Vehicles updated, {} failed to update/create".format(count_created, count_updated, count_error))
-
-    def import_rules(self, csvfile, *args, **kwargs):
-        log.info("Rule Importer started")
-        RuleWT.objects.all().delete()
-        csvf = io.StringIO(csvfile.read().decode('utf-8'))
-        content = []
-        line = 0
-        #myRules = RuleBuilder('V')
-        reader = csv.DictReader(csvf,fieldnames=('lat', 'lng', 'radius', 'zip_code', 'make', 'model', 'objno', 'year', 'age', 'service_contract', 'ikz', 'kuerzel', 'address', 'note'),delimiter=';')
-        for row in reader:
-            if not line == 0:
-                rd = dict(row)
-                #myRules.append_rule(dict(row))
-                try:
-                    new = RuleWT()
-                    new.lat = self.to_float(rd['lat'])
-                    new.lng = self.to_float(rd['lng'])
-                    new.radius = self.to_float(rd['radius'])
-                    new.zip_code = self.check_empty_string(rd['zip_code'])
-                    new.make = self.check_empty_string(rd['make'])
-                    new.objno = self.check_empty_string(rd['objno'])
-                    new.year = self.check_empty_string(rd['year'])
-                    new.age = self.check_empty_string(rd['age'])
-                    new.service_contract = self.check_empty_string(rd['service_contract'])
-                    new.ikz = self.check_empty_string(rd['ikz'])
-                    new.kuerzel = self.check_empty_string(rd['kuerzel'])
-                    new.address = self.check_empty_string(rd['address'])
-                    new.note = self.check_empty_string(rd['note'])
-                    new.save()
-                except Exception as e:
-                    log.info("Rule Importer")
-                    log.info(rd)
-                    log.error(e)
-            line += 1
-        new.update_row_numbers()
-        #myRules.save()
-
-    def to_float(self, obj):
-        try:
-            return float(obj)
-        except:
-            return None
-
-    def check_empty_string(self, obj):
-        if obj == '':
-            return None
-        else:
-            return str(obj)
 
 class HealthCheck(View):
     template_name = "healthcheck.html"

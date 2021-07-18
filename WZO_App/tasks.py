@@ -88,11 +88,16 @@ def send_delete_mail(user_first, user_mail):
     email.send()
     return 
 
-@shared_task
-def import_zip_codes(fileid):
+@shared_task(bind=True)
+def import_zip_codes(self, fileid):
     log.info("ZipImporter started. Upload-PK: {}".format(fileid))
+    progress_recorder = ProgressRecorder(self)
+    current = 0
     csvf = Upload.objects.get(pk=fileid)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
+        total = sum(1 for line in f)
+        log.info("Total Rows to import: {}".format(total))
+        f.seek(0)
         next(f,None) #Skip Header
         reader = csv.DictReader(f,fieldnames=('osm_id', 'ort', 'plz', 'bundesland'),delimiter=';')
         Zip_Code.objects.all().delete()
@@ -106,23 +111,29 @@ def import_zip_codes(fileid):
                 log.debug(content)
                 log.debug(e)
                 pass
-            print("DONE: {}".format(counter),end="\r")
+            current = counter + 1
+            progress_recorder.set_progress(current, total)
     csvf.finished = True
     csvf.save()
     log.info("Task completed")
     print("")
     print("Fertig")
-    return
+    return 'Done'
 
 def get_zip_obj(zip_code):
     cobj = Zip_Code.objects.filter(zip_code=zip_code).first()
     return cobj
 
-@shared_task
-def import_workshops(fileid):
+@shared_task(bind=True)
+def import_workshops(self, fileid):
     log.info("Workshop Importer started.Upload-PK: {}".format(fileid))
+    progress_recorder = ProgressRecorder(self)
+    current = 0
     csvf = Upload.objects.get(pk=fileid)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
+        total = sum(1 for line in f)
+        log.info("Total Rows to import: {}".format(total))
+        f.seek(0)
         next(f,None) #Skip Header
         count_created = 0
         count_updated = 0
@@ -145,15 +156,15 @@ def import_workshops(fileid):
                 log.error(e)
                 count_error += 1
                 pass
-            print("DONE: {}".format(counter),end="\r")
+            current = counter + 1
+            progress_recorder.set_progress(current, total)
     Workshop.objects.filter(deleted=True).delete()
     log.info("{} Workshops created, {} Workshops updated, {} failed to update/create".format(count_created, count_updated, count_error))
     csvf.finished = True
     csvf.save()
     log.info("Task completed")
-    print("")
     print("Fertig")
-    return
+    return "{} Workshops created, {} Workshops updated, {} failed to update/create".format(count_created, count_updated, count_error)
 
 def get_eort_by_fm_eort_id(fm_eort_id):
     try:
@@ -246,13 +257,18 @@ def import_eort(self, fileid):
     log.info("Task completed")
     print("")
     print("Fertig")
-    return
+    return "{} Eorte created, {} Eorte updated, {} failed to update/create".format(count_created, count_updated, count_error)
 
-@shared_task
-def import_veh(fileid):
+@shared_task(bind=True)
+def import_veh(self, fileid):
     log.info("Veh Importer started.Upload-PK: {}".format(fileid))
+    progress_recorder = ProgressRecorder(self)
+    current = 0
     csvf = Upload.objects.get(pk=fileid)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
+        total = sum(1 for line in f)
+        log.info("Total Rows to import: {}".format(total))
+        f.seek(0)
         next(f,None) #Skip Header
         count_created = 0
         count_updated = 0
@@ -276,7 +292,8 @@ def import_veh(fileid):
                 log.error(e)
                 count_error += 1
                 pass
-            print("DONE: {}".format(counter),end="\r")
+            current = counter + 1
+            progress_recorder.set_progress(current, total)
     Vehicle.objects.filter(deleted=True).delete()
     log.info("{} Vehicles created, {} Vehicles updated, {} failed to update/create".format(count_created, count_updated, count_error))
     csvf.finished = True
@@ -284,7 +301,7 @@ def import_veh(fileid):
     log.info("Task completed")
     print("")
     print("Fertig")
-    return
+    return "{} Vehicles created, {} Vehicles updated, {} failed to update/create".format(count_created, count_updated, count_error)
 
 def to_float(obj):
     try:
@@ -298,11 +315,16 @@ def check_empty_string(obj):
     else:
         return str(obj)
 
-@shared_task
-def import_rules(fileid):
+@shared_task(bind=True)
+def import_rules(self, fileid):
     log.info("Rule Importer started.Upload-PK: {}".format(fileid))
+    progress_recorder = ProgressRecorder(self)
+    current = 0
     csvf = Upload.objects.get(pk=fileid)
     with open(csvf.record.path, 'r', encoding='utf-8') as f:
+        total = sum(1 for line in f)
+        log.info("Total Rows to import: {}".format(total))
+        f.seek(0)
         next(f,None) #Skip Header
         reader = csv.DictReader(f,fieldnames=('lat', 'lng', 'radius', 'zip_code', 'make', 'model', 'objno', 'year', 'age', 'service_contract', 'ikz', 'kuerzel', 'address', 'note'),delimiter=';')
         RuleWT.objects.all().delete()
@@ -330,13 +352,14 @@ def import_rules(fileid):
                 log.debug(rd)
                 log.error(e)
                 pass
-            print("DONE: {}".format(counter),end="\r")
+            current = counter + 1
+            progress_recorder.set_progress(current, total)
     print("")
     print("Update Row Index started")
     new.update_row_numbers()
     log.info("Task completed")
     print("Fertig")
-    return
+    return 'Done'
 
 @shared_task
 def run_rules():
