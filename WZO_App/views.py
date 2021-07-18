@@ -331,6 +331,7 @@ class Import(View):
             if not running_tasks:
                 return render(request, self.template_name)
             else:
+                log.info({'tasks': running_tasks})
                 return render(request, self.template_name, {'tasks': running_tasks})
         else:
             return HttpResponse(status=403)
