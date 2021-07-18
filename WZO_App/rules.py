@@ -329,7 +329,11 @@ class RuleEngineWT():
             output = self.run_checks(v)
             if output is not None:
                 log.debug('Output: {}'.format(output))
-                w = Workshop.objects.get(kuerzel=output)
+                try:
+                    w = Workshop.objects.get(kuerzel=output)
+                except Workshop.DoesNotExist:
+                    log.warning("Error: Workshop {} does not exist".format(output))
+                    continue
                 new = Allocation.objects.create(a_type='V', v_id=v, w_id= w)
                 new.save()
 
